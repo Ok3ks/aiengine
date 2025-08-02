@@ -34,28 +34,37 @@ class Client:
     def __init__(self, logger: logging.Logger):
         """Initialize Spotify client with necessary permissions"""
         self.logger = logger
-        # scope = "user-library-read,user-read-playback-state,user-modify-playback-state,user-read-currently-playing,playlist-read-private,playlist-read-collaborative,playlist-modify-private,playlist-modify-public"
+        scope = SCOPES
+         
         if CLIENT_ID is not None and CLIENT_SECRET is not None:
-            auth_header = base64.b64encode(str(CLIENT_ID + ":" + CLIENT_SECRET).encode("ascii"))
-        auth = {"Authorization": f"Basic {auth_header.decode('ascii')}"}
+            auth = self.get_bearer_token(CLIENT_ID, CLIENT_SECRET)
+            auth = {"Authorization": f"Bearer {auth}"} 
         try:
-            self.sp = spotipy.Spotify(auth)
-                
-            #     auth_manager=
-            #                           SpotifyOAuth(
-            #     scope=scope,
-            #     client_id=CLIENT_ID,
-            #     client_secret=CLIENT_SECRET,
-            #     redirect_uri=REDIRECT_URI)
-            #     )
+            self.sp = spotipy.Spotify(
+                auth=auth)
 
-            # self.auth_manager: SpotifyOAuth = self.sp.auth_manager
+            self.auth_manager: SpotifyOAuth = self.sp.auth_manager
             # self.cache_handler: CacheFileHandler = self.auth_manager.cache_handler
         except Exception as e:
             self.logger.error(f"Failed to initialize Spotify client: {str(e)}")
             raise
 
         self.username = None
+    
+    def get_bearer_token(self, client_id, client_secret):
+        response = requests.post(
+            "https://accounts.spotify.com/api/token", 
+            headers={
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "grant_type": "client_credentials"
+            })
+        response = response.json()
+        print(response)
+        return response["access_token"]
 
     @utils.validate
     def set_username(self, device=None):
