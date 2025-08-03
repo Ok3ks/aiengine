@@ -4,5 +4,8 @@ Goal: Ideas around lyrics search, playlist creation, song writing --> music crea
 
 Remote MCPs: Github
 
+Spotify MCP has authorization issue
+Trying out ACI. DEV with ready made MCPs (ARXIV Mcp)
+
 
 

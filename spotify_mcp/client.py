@@ -1,6 +1,7 @@
 from pydantic_ai import Agent
-from pydantic_ai.mcp import MCPServerStreamableHTTP
+from pydantic_ai.mcp import MCPServerStreamableHTTP, MCPServerSSE
 import asyncio
+from aci import ACI
 import os
 import logfire
 
@@ -10,11 +11,14 @@ github_server = MCPServerStreamableHTTP(url='https://api.githubcopilot.com/mcp',
         "Authorization": f"Bearer {github_mcp_pat}"
       },
 )
+arxiv_mcp = MCPServerSSE(url="http://0.0.0.0:8001/sse")
+aci = ACI()
+arxiv_function = aci.functions.get_definition("ARXIV__SEARCH_PAPERS")
 
 # youtube_mcp
 # twitter_mcp
 
-agent = Agent('anthropic:claude-3-5-sonnet-latest', toolsets=[spotify_mcp], instructions="You are an excellent DJ with global taste at the same time niche taste, You are independent, You do not rely on the user's taste before recommendation.")
+agent = Agent('anthropic:claude-3-5-sonnet-latest', toolsets=[arxiv_mcp])
 agent.set_mcp_sampling_model()
 
 
