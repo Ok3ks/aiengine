@@ -11,6 +11,7 @@ from mcp.types import Request
 from starlette.responses import Response
 
 
+
 # Setup basic logging
 def setup_logger():
     class Logger:
@@ -47,22 +48,22 @@ async def playback(action: str, spotify_uri: Optional[str] = None, num_skips: in
     try:
         if action == "get":
             logger.info("Attempting to get current track")
-            curr_track = await spotify_client.get_current_track()
+            curr_track = spotify_client.get_current_track()
             if curr_track:
                 logger.info(f"Current track: {curr_track.get('name', 'Unknown')}")
                 return json.dumps(curr_track, indent=2)
             return "No track playing."
         elif action == "start":
             logger.info(f"Starting playback with spotify_uri: {spotify_uri}")
-            await spotify_client.start_playback(spotify_uri=spotify_uri)
+            spotify_client.start_playback(spotify_uri=spotify_uri)
             return "Playback starting."
         elif action == "pause":
             logger.info("Pausing playback")
-            await spotify_client.pause_playback()
+            spotify_client.pause_playback()
             return "Playback paused."
         elif action == "skip":
             logger.info(f"Skipping {num_skips} track(s)")
-            await spotify_client.skip_track(n=num_skips)
+            spotify_client.skip_track(n=num_skips)
             return "Skipped to next track."
         else:
             return f"Unknown playback action: {action}"
@@ -90,11 +91,11 @@ async def queue_tool(action: str, track_id: Optional[str] = None) -> str:
             if not track_id:
                 return "track_id is required for add action."
             logger.info(f"Adding track {track_id} to queue")
-            await spotify_client.add_to_queue(track_id)
+            spotify_client.add_to_queue(track_id)
             return "Track added to queue."
         elif action == "get":
             logger.info("Retrieving queue")
-            current_queue = await spotify_client.get_queue()
+            current_queue = spotify_client.get_queue()
             return json.dumps(current_queue, indent=2)
         else:
             return f"Unknown queue action: {action}. Supported actions are: add, get."
@@ -114,7 +115,7 @@ async def get_info(item_uri: str) -> str:
     """
     try:
         logger.info(f"Retrieving info for item: {item_uri}")
-        item_info = await spotify_client.get_info(item_uri=item_uri)
+        item_info = spotify_client.get_info(item_uri=item_uri)
         return json.dumps(item_info, indent=2)
     except Exception as e:
         logger.error(f"Error in get_info: {str(e)}")
@@ -126,7 +127,7 @@ async def get_info(item_uri: str) -> str:
 # ------------------------------------------------------------------------------
 
 @spotify_mcp.tool()
-async def search_audiobook(query: str, qtype: str = "audiobook", limit: int = 10) -> str:
+async def search_artist(query: str, qtype: str = "artist", limit: int = 10) -> str:
     """
     Search for Spotify content.
     Parameters:
@@ -134,21 +135,34 @@ async def search_audiobook(query: str, qtype: str = "audiobook", limit: int = 10
       - qtype: The type of item (track, album, artist, playlist, or multiple comma-separated types).
       - limit: Maximum number of results to return.
     """
-
-    # classify query into labels
-    # check if query has listed labels
-    # create classification agent, which maps queries to labels (available labels")
-
     try:
         logger.info(f"Searching for '{query}' with type '{qtype}'")
-        search_results = await spotify_client.search(query=query, qtype=qtype, limit=limit)
+        search_results = spotify_client.search(query=query, qtype=qtype, limit=limit)
+        return json.dumps(search_results, indent=2)
+    except Exception as e:
+        logger.error(f"Error in search: {str(e)}")
+        return f"Error: {str(e)}"
+    
+
+@spotify_mcp.tool()
+async def search_track(query: str, qtype: str = "track", limit: int = 10) -> str:
+    """
+    Search for Spotify content.
+    Parameters:
+      - query: The search term.
+      - qtype: The type of item (track, album, artist, playlist, or multiple comma-separated types).
+      - limit: Maximum number of results to return.
+    """
+    try:
+        logger.info(f"Searching for '{query}' with type '{qtype}'")
+        search_results = spotify_client.search(query=query, qtype=qtype, limit=limit)
         return json.dumps(search_results, indent=2)
     except Exception as e:
         logger.error(f"Error in search: {str(e)}")
         return f"Error: {str(e)}"
     
 @spotify_mcp.tool()
-async def search(query: str, qtype: str = "track", limit: int = 10) -> str:
+async def search_playlist(query: str, qtype: str = "playlist", limit: int = 10) -> str:
     """
     Search for Spotify content.
     Parameters:
@@ -158,12 +172,58 @@ async def search(query: str, qtype: str = "track", limit: int = 10) -> str:
     """
     try:
         logger.info(f"Searching for '{query}' with type '{qtype}'")
-        search_results = await spotify_client.search(query=query, qtype=qtype, limit=limit)
+        search_results = spotify_client.search(query=query, qtype=qtype, limit=limit)
         return json.dumps(search_results, indent=2)
     except Exception as e:
         logger.error(f"Error in search: {str(e)}")
         return f"Error: {str(e)}"
 
+
+@spotify_mcp.tool()
+async def search_episode(query: str, qtype: str = "episode", limit: int = 10) -> str:
+    """
+    Search for Spotify content.
+    Parameters:
+      - query: The search term.
+      - qtype: The type of item (track, album, artist, playlist, or multiple comma-separated types).
+      - limit: Maximum number of results to return.
+    """
+
+    logger.info(f"Searching for '{query}' with type '{qtype}'")
+    search_results = spotify_client.search(query=query, qtype=qtype, limit=limit)
+    return search_results
+   
+
+@spotify_mcp.tool()
+async def search_show(query: str, qtype: str = "show", limit: int = 10) -> str:
+    """
+    Search for Spotify content.
+    Parameters:
+      - query: The search term.
+      - qtype: The type of item (track, album, artist, playlist, or multiple comma-separated types).
+      - limit: Maximum number of results to return.
+    """
+
+    logger.info(f"Searching for '{query}' with type '{qtype}'")
+    search_results = spotify_client.search(query=query, qtype=qtype, limit=limit)
+    return json.dumps(search_results, indent=2)
+
+@spotify_mcp.tool()
+async def search_album(query: str, qtype: str = "album", limit: int = 10) -> str:
+    """
+    Search for Spotify content.
+    Parameters:
+      - query: The search term.
+      - qtype: The type of item (track, album, artist, playlist, or multiple comma-separated types).
+      - limit: Maximum number of results to return.
+    """
+
+    logger.info(f"Searching for '{query}' with type '{qtype}'")
+    search_results = spotify_client.search(query=query, qtype=qtype, limit=limit)
+
+    return json.dumps(search_results, indent=2)
+    
+# ,album,show,episode,playlist,track,artist
 # ------------------------------------------------------------------------------
 # TOOL: Playlist
 # Manage Spotify playlists.
@@ -195,25 +255,25 @@ async def playlist(
     try:
         if action == "get":
             logger.info("Retrieving user playlists")
-            playlists = await spotify_client.get_current_user_playlists()
+            playlists = spotify_client.get_current_user_playlists()
             return json.dumps(playlists, indent=2)
         elif action == "get_tracks":
             if not playlist_id:
                 return "playlist_id is required for get_tracks action."
             logger.info(f"Getting tracks for playlist: {playlist_id}")
-            tracks = await spotify_client.get_playlist_tracks(playlist_id)
+            tracks = spotify_client.get_playlist_tracks(playlist_id)
             return json.dumps(tracks, indent=2)
         elif action == "add_tracks":
             if not playlist_id or not track_ids:
                 return "playlist_id and track_ids are required for add_tracks action."
             logger.info(f"Adding tracks {track_ids} to playlist {playlist_id}")
-            await spotify_client.add_tracks_to_playlist(playlist_id=playlist_id, track_ids=track_ids)
+            spotify_client.add_tracks_to_playlist(playlist_id=playlist_id, track_ids=track_ids)
             return "Tracks added to playlist."
         elif action == "remove_tracks":
             if not playlist_id or not track_ids:
                 return "playlist_id and track_ids are required for remove_tracks action."
             logger.info(f"Removing tracks {track_ids} from playlist {playlist_id}")
-            await spotify_client.remove_tracks_from_playlist(playlist_id=playlist_id, track_ids=track_ids)
+            spotify_client.remove_tracks_from_playlist(playlist_id=playlist_id, track_ids=track_ids)
             return "Tracks removed from playlist."
         elif action == "change_details":
             if not playlist_id:
@@ -221,7 +281,7 @@ async def playlist(
             if not (name or description):
                 return "At least one of name or description is required for change_details action."
             logger.info(f"Changing details for playlist {playlist_id}")
-            await spotify_client.change_playlist_details(playlist_id=playlist_id, name=name, description=description)
+            spotify_client.change_playlist_details(playlist_id=playlist_id, name=name, description=description)
             return "Playlist details changed."
         elif action == "create_playlist":
             if not playlist_id:
@@ -229,7 +289,7 @@ async def playlist(
             if not (name or description):
                 return "At least one of name or description is required for change_details action."
             logger.info(f"Create details for playlist {playlist_id}")
-            await spotify_client.create_playlist(name, description)
+            spotify_client.create_playlist(name, description)
             return "Create playlist."
         else:
             return f"Unknown playlist action: {action}."
@@ -239,10 +299,7 @@ async def playlist(
 
 @spotify_mcp.custom_route("/success", methods=["GET", "POST"])
 async def success_endpoint(request: Request) -> Response:
-    return Response(content={
-        "status": "success",
-        "message": "The request was processed successfully."
-    })
+    return Response(content=bytes("The request was processed successfully.", encoding="utf-8"), status_code=200)
 # ------------------------------------------------------------------------------
 # If desired, you can combine this FastMCP server with others (or with Starlette)
 # using an async lifespan function. For example:

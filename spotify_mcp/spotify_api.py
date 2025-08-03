@@ -66,7 +66,7 @@ class Client:
         print(response)
         return response["access_token"]
 
-    @utils.validate
+
     def set_username(self, device=None):
         self.username = self.sp.current_user()['display_name']
 
@@ -74,7 +74,7 @@ class Client:
         """
         Searches based of query term.
         - query: query term
-        - qtype: the types of items to return. One or more of 'artist', 'album',  'track', 'playlist'.
+        - qtype: the types of items to return. One or more of 'artist', 'album',  'track', 'playlist', "show" and "episode".
                  If multiple types are desired, pass in a comma separated string; e.g. 'track,album'
         - limit: max # items to return
         """
@@ -147,7 +147,7 @@ class Client:
             self.logger.error("Error getting current track info.")
             raise
 
-    @utils.validate
+
     def start_playback(self, spotify_uri=None, device=None):
         """
         Starts spotify playback of uri. If spotify_uri is omitted, resumes current playback.
@@ -183,14 +183,14 @@ class Client:
             self.logger.error(f"Error starting playback: {str(e)}.")
             raise
 
-    @utils.validate
+
     def pause_playback(self, device=None):
         """Pauses playback."""
         playback = self.sp.current_playback()
         if playback and playback.get('is_playing'):
             self.sp.pause_playback(device.get('id') if device else None)
 
-    @utils.validate
+
     def add_to_queue(self, track_id: str, device=None):
         """
         Adds track to queue.
@@ -198,7 +198,7 @@ class Client:
         """
         self.sp.add_to_queue(track_id, device.get('id') if device else None)
 
-    @utils.validate
+
     def get_queue(self, device=None):
         """Returns the current queue of tracks."""
         queue_info = self.sp.queue()
@@ -208,7 +208,6 @@ class Client:
 
         return queue_info
 
-    @utils.validate
     def get_liked_songs(self):
         # todo
         results = self.sp.current_user_saved_tracks()
@@ -225,7 +224,7 @@ class Client:
             return True
         return False
 
-    @utils.validate
+
     def get_current_user_playlists(self, limit=50) -> List[Dict]:
         """
         Get current user's playlists.
@@ -236,7 +235,7 @@ class Client:
             raise ValueError("No playlists found.")
         return [utils.parse_playlist(playlist, self.username) for playlist in playlists['items']]
     
-    @utils.ensure_username
+
     def get_playlist_tracks(self, playlist_id: str, limit=50) -> List[Dict]:
         """
         Get tracks from a playlist.
@@ -248,7 +247,7 @@ class Client:
             raise ValueError("No playlist found.")
         return utils.parse_tracks(playlist['tracks']['items'])
     
-    @utils.ensure_username
+
     def add_tracks_to_playlist(self, playlist_id: str, track_ids: List[str], position: Optional[int] = None):
         """
         Add tracks to a playlist.
