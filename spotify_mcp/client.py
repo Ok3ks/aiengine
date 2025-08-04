@@ -11,14 +11,15 @@ github_server = MCPServerStreamableHTTP(url='https://api.githubcopilot.com/mcp',
         "Authorization": f"Bearer {github_mcp_pat}"
       },
 )
-arxiv_mcp = MCPServerSSE(url="http://0.0.0.0:8001/sse")
+aci_mcp = MCPServerSSE(url="http://0.0.0.0:8001/sse")
+
 aci = ACI()
 arxiv_function = aci.functions.get_definition("ARXIV__SEARCH_PAPERS")
 
 # youtube_mcp
 # twitter_mcp
 
-agent = Agent('anthropic:claude-3-5-sonnet-latest', toolsets=[arxiv_mcp])
+agent = Agent('anthropic:claude-3-5-sonnet-latest', toolsets=[aci_mcp])
 agent.set_mcp_sampling_model()
 
 
